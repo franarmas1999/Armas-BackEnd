@@ -1,155 +1,155 @@
-//DESAFIO PRIMER ENTREGABLE
+//DESAFIOS ENTREGABLES
 
-const  fs  =  requerir ( "fs" ) ;
+const fs = require("fs");
 
-const  writeFile  =  ( ruta ,  productos )  =>
-	fs . promesas _ writeFile ( ruta ,  JSON . stringify ( {  productos : productos  } ) ) ;
+const writeFile = (path, products) =>
+	fs.promises.writeFile(path, JSON.stringify({ products: products }));
 
-const  readFile  =  asíncrono  ( ruta )  =>  {
-	const  asyncGetProducts  =  await  fs . promesas _ leerArchivo ( ruta ) ;
-	const  parseResult  =  JSON . analizar ( asyncGetProducts ) ;
+const readFile = async (path) => {
+	const asyncGetProducts = await fs.promises.readFile(path);
+	const parseResult = JSON.parse(asyncGetProducts);
 
-	volver  parseResult ;
-} ;
+	return parseResult;
+};
 
-clase  ProductManager  {
-	constructor ( ruta )  {
-		esto _ productos  =  [ ] ;
-		esto _ ruta  =  ruta ;
+class ProductManager {
+	constructor(path) {
+		this.products = [];
+		this.path = path;
 	}
 
-	inicializar  =  asíncrono  ( )  =>  {
-		const  existeArchivo  =  fs . existeSync ( esta.ruta ) ; _ _
+	initialize = async () => {
+		const existsFile = fs.existsSync(this.path);
 
-		si  ( archivoexiste )  {
-			consola _ log ( "El archivo ya existia!" ) ;
-			const  { productos }  =  esperar  readFile ( esta ruta ) ; _
-			esto _ productos  =  productos ;
-		}  más  {
-			await  writeFile ( este.ruta , este.productos ) ; _ _ _ _ 
-			consola _ log ( "El archivo se creo exitosamente!" ) ;
+		if (existsFile) {
+			console.log("El archivo ya existía!");
+			const { products } = await readFile(this.path);
+			this.products = products;
+		} else {
+			await writeFile(this.path, this.products);
+			console.log("El archivo se creó exitosamente!");
 		}
-	} ;
+	};
 
-	getProductos  =  asíncrono  ( )  =>  {
-		const  fileData  =  await  readFile ( este .ruta ) ; _
-		devolver  datos de archivo ;
-	} ;
+	getProducts = async () => {
+		const fileData = await readFile(this.path);
+		return fileData;
+	};
 
-	addProduct  =  async  ( { título , descripción , precio , miniatura , código , existencias } )  =>  {
-		// Aqui solo valido por el titulo o por el codigo, no hay problema que se repita cualquiera de los otros campos
-		const  productoEncontrado  =  esto . productos _ encontrar (
-			( producto )  =>  producto . titulo  ===  titulo  ||  producto _ código  ===  código
-		) ;
+	addProduct = async ({ title, desc, price, thumbnail, code, stock }) => {
+		// Aqui solo valido por el título o por el código, no hay problema que se repita cualquiera de los otros campos
+		const findedProduct = this.products.find(
+			(product) => product.title === title || product.code === code
+		);
 
-		if  ( producto encontrado )  {
-			consola _ registro (
-				`Error ya existe un producto con ese título ${ title } o código ${ code } `
-			) ;
-		}  más  {
-			const  id  =  esto . productos _ longitud  +  1 ;
-			esto _ productos _ empujar ( {
-				identificación ,
-				titulo ,
-				descripción ,
-				precio ,
-				miniatura ,
-				código ,
-				existencias ,
-			} ) ;
-			await  writeFile ( este.ruta , este.productos ) ; _ _ _ _ 
-			consola _ log ( "Producto creado exitosamente" ) ;
+		if (findedProduct) {
+			console.log(
+				`Error ya existe un producto con ese titulo ${title} o código ${code} `
+			);
+		} else {
+			const id = this.products.length + 1;
+			this.products.push({
+				id,
+				title,
+				desc,
+				price,
+				thumbnail,
+				code,
+				stock,
+			});
+			await writeFile(this.path, this.products);
+			console.log("Producto creado exitosamente");
 		}
-	} ;
+	};
 
-	getProductById  =  ( id )  =>  {
-		const  productoEncontrado  =  esto . productos _ encontrar (
-			( producto )  =>  producto . identificación  ===  identificación
-		) ;
+	getProductById = (id) => {
+		const findedProduct = this.products.find(
+			(product) => product.id === id
+		);
 
-		if  ( producto encontrado )  {
-			devolver  producto encontrado ;
-		}  más  {
-			consola _ log ( "No se encuentra un producto con ese id" ) ;
-			devolver  nulo ;
+		if (findedProduct) {
+			return findedProduct;
+		} else {
+			console.log("No se encuentra un producto con ese id");
+			return null;
 		}
-	} ;
+	};
 
-	actualizarProducto  =  asíncrono  ( id ,  nuevoProducto )  =>  {
-		const  findIndexProduct  =  esto . productos _ buscarIndice (
-			( producto )  =>  producto . identificación  ===  identificación
-		) ;
+	updateProduct = async (id, newProduct) => {
+		const findIndexProduct = this.products.findIndex(
+			(product) => product.id === id
+		);
 
-		if  ( buscarProductoÍndice  !==  - 1 )  {
-			const  id  =  esto . productos [ buscarProductoÍndice ] . identificación ;
+		if (findIndexProduct !== -1) {
+			const id = this.products[findIndexProduct].id;
 
-			esto _ productos [ findIndexProduct ]  =  {
-				identificación ,
-				... nuevoProducto ,
-			} ;
-			await  writeFile ( este.ruta , este.productos ) ; _ _ _ _ 
-			consola _ log ( "Actualizado correctamente" ) ;
-		}  más  {
-			consola _ log ( "No se encuentra un producto con ese id" ) ;
+			this.products[findIndexProduct] = {
+				id,
+				...newProduct,
+			};
+			await writeFile(this.path, this.products);
+			console.log("Actualizado correctamente");
+		} else {
+			console.log("No se encuentra un producto con ese id");
 		}
-	} ;
+	};
 
-	eliminarProducto  =  asíncrono  ( id )  =>  {
-		const  findIndexProduct  =  esto . productos _ buscarIndice (
-			( producto )  =>  producto . identificación  ===  identificación
-		) ;
+	deleteProduct = async (id) => {
+		const findIndexProduct = this.products.findIndex(
+			(product) => product.id === id
+		);
 
-		if  ( buscarProductoÍndice  !==  - 1 )  {
-			const  nuevosProductos  =  esto . productos _ filtro (
-				( producto )  =>  producto . identificación  !==  identificación
-			) ;
-			await  writeFile ( este .ruta , nuevosProductos ) ; _ 
-			consola _ log ( "Eliminado correctamente" ) ;
-		}  más  {
-			consola _ log ( "No se encuentra un producto con ese id" ) ;
+		if (findIndexProduct !== -1) {
+			const newProducts = this.products.filter(
+				(product) => product.id !== id
+			);
+			await writeFile(this.path, newProducts);
+			console.log("Eliminado correctamente");
+		} else {
+			console.log("No se encuentra un producto con ese id");
 		}
-	} ;
+	};
 }
 
- función  asíncrona principal ( )  {
-	const  productManger  =  new  ProductManager ( "./data.json" ) ;
-	esperar  productManger . inicializar ( ) ;
+async function main() {
+	const productManger = new ProductManager("./data.json");
+	await productManger.initialize();
 
-	let  products  =  await  productManger . obtenerProductos ( ) ;
-	consola _ registro ( productos ) ;
+	let products = await productManger.getProducts();
+	console.log(products);
 
-	const  nuevoProducto  =  {
-		título : "P1" ,
-		descripción : "D1" ,
-		precio : "P1" ,
-		miniatura : "T1" ,
-		código : "C1" ,
-		existencias : "S1" ,
-	} ;
+	const newProduct = {
+		title: "P1",
+		desc: "D1",
+		price: "P1",
+		thumbnail: "T1",
+		code: "C1",
+		stock: "S1",
+	};
 
-	esperar  productManger . agregarProducto ( nuevoProducto ) ;
+	await productManger.addProduct(newProduct);
 
-	productos  =  espera  productManger . obtenerProductos ( ) ;
-	consola _ registro ( productos ) ;
+	products = await productManger.getProducts();
+	console.log(products);
 
-	const producto a  actualizar  =  {
-		título : "P0" ,
-		descripción : "D0" ,
-		precio : "P1" ,
-		miniatura : "T1" ,
-		código : "C1" ,
-		existencias : "S1" ,
-	} ;
+	const productToUpdate = {
+		title: "P0",
+		desc: "D0",
+		price: "P1",
+		thumbnail: "T1",
+		code: "C1",
+		stock: "S1",
+	};
 
-	esperar  productManger . actualizarProducto ( 1 ,  productoaActualizar ) ;
+	await productManger.updateProduct(1, productToUpdate);
 
-	productos  =  espera  productManger . obtenerProductos ( ) ;
-	consola _ registro ( productos ) ;
+	products = await productManger.getProducts();
+	console.log(products);
 
-	esperar  productManger . eliminarProducto ( 1 ) ;
+	await productManger.deleteProduct(1);
 
-	productos  =  espera  productManger . obtenerProductos ( ) ;
-	consola _ registro ( productos ) ;
+	products = await productManger.getProducts();
+	console.log(products);
 }
 
-principal ( ) ;
+main();
